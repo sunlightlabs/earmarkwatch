@@ -1,0 +1,90 @@
+{% extends "user_base.html" %}
+
+{% block user_content %}
+
+<a name="messages"></a>
+{% ifnotequal the_user.comments_for.count 0 %}
+<p class="profile_heads">{{page.paginator.count}} Messages have been left for
+
+{% ifequal user.id the_user.id %}
+    you
+{% else %}
+    {{ the_user.username }}
+{% endifequal %}
+
+</p>
+
+
+<div id="paginate_box">
+{{page.start_index}}-{{page.end_index}} of {{page.paginator.count}}
+{% if page.has_previous %}<a href="{% url user_view_tab_page the_user.username "messages" page.previous_page_number %}" class="pagination_top">&laquo; Prev</a>{% endif %}
+{% if page.has_next %}<a href="{% url user_view_tab_page the_user.username "messages" page.next_page_number %}" class="pagination_top">Next &raquo;</a>{% endif %}
+</div>
+
+{% for c in page.object_list %}
+    <a name="comment_{{c.id}}"></a>
+
+<div id="comment_top"><p><a href="{% url user_view c.user.username %}" class="user_wrote">{{c.user}}</a> wrote:</p>
+
+</div>
+<div id="comment_bottom">
+  {% if c.flagged %}
+    <span class="flag"><strong>[this item has been flagged and is pending review]</strong></span><br />
+  {% endif %}
+  {{c.text}}
+     <p class="posted">posted <a href="#comment_{{c.id}}" class="user_posted">{{c.submit_date|date:"F j, Y \a\t P"}}</a>
+     {% comment %}
+     {% if user.is_authenticated %}
+     {% ifequal c.status "U" %}
+     <span id="flagcomment{{c.id}}">(<a href="javascript:flagComment({{c.id}});" class="flag" title="Flag this Comment as Noise!">flag</a>)</span>
+     {% endifequal %}
+     {% endif %}
+     {% endcomment %}
+     </p>
+</div>
+{% endfor %}
+
+<div id="paginate_box">
+{{page.start_index}}-{{page.end_index}} of {{page.paginator.count}}
+{% if page.has_previous %}<a href="{% url user_view_tab_page the_user.username "messages" page.previous_page_number %}" class="pagination_top">&laquo; Prev</a>{% endif %}
+{% if page.has_next %}<a href="{% url user_view_tab_page the_user.username "messages" page.next_page_number %}" class="pagination_top">Next &raquo;</a>{% endif %}
+</div>
+
+{% else %}
+<p class="profile_heads">No messages have been left for
+{% ifequal user.id the_user.id %}
+    you
+{% else %}
+    {{ the_user.username }}
+{% endifequal %}
+</p>
+
+{% endifnotequal %}
+
+<!--  if the user is not logged in, they don't see the comment box -->
+{% if user.is_authenticated %}
+
+
+<br /><br />
+<a name="comment"></a>
+
+<h1 class="green_header">Leave a message for
+{% ifequal user.id the_user.id %}
+    yourself
+{% else %}
+    {{ the_user.username }}
+{% endifequal %}
+</h1>
+<div id="greenbox">
+<form method="post" action="{% url post_user_comment %}">
+<textarea id="text" name="text" cols="60" rows="5"></textarea>
+<input type="hidden" name="id" value="{{the_user.id}}" />
+<p>Note: Please keep messages related to earmarks and earmark research.</p>
+<input type="submit" value="Submit Your Message" class="button" />
+</form>
+</div>
+
+{% endif %}
+
+
+{% endblock user_content %}

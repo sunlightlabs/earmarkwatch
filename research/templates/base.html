@@ -1,0 +1,259 @@
+{% load count %}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+ "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>{% block title %}
+ {% if sponsor %}{{sponsor.firstname}} {{sponsor.lastname}} - {% endif %}
+
+{% if earmark %} {{earmark}} - EarmarkWatch.org {% endif %}
+
+{% if source and not earmark %} {{source}} - EarmarkWatch.org{% endif %}
+{% if not source and not earmark %}EarmarkWatch.org{% if not the_user and not source and not earmark %}: Bringing Citizen Oversight to Congressional Spending{% endif %}{% endif %}{% if the_user and not source and not earmark %}/user/{{the_user}} Bringing Citizen Oversight to Congressional Spending{% endif %}
+
+
+    {% endblock %}</title>
+    <meta name="author" content="Sunlight Labs" />
+    <meta name="robots" content="all" />
+
+    <script src="http://sunlightlabs.com/scripts/prototype.js"></script>
+    <script src="/static/scripts/motionpack.js"> </script>
+    <script src="/static/scripts/earmarkwatch.js"> </script>
+
+    <link rel="stylesheet" href="/static/scripts/reset-fonts-grids.css" type="text/css">
+    <link rel="stylesheet" href="/static/scripts/earmarkwatch.css" type="text/css">
+
+    {% block scripts %}{% endblock %}
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+<div align="right" id="project_of"><a href="http://www.sunlightfoundation.com" class="project_of"><img src="/static/images/project_of_sf.gif" border="0" alt="Project of The Sunlight Foundation"></a>
+<a href="http://www.taxpayer.net" class="project_of_last"><img src="/static/images/project_of_tpcs.gif" border="0" alt="Project of Taxpayers for Common Sense"></a></div>
+<div id="doc" class="yui-t1">
+<div id="hd">
+
+	
+	
+   <div id="headbox"><h1 class="head_title"><a href="{% url index %}" title="Earmark Watch">Earmark Watch</a></h1>
+<div id="earmark_bill">
+
+{% if source %}
+<a href="javascript:;" onmousedown="toggleSlide('choosebill');" class="earmark_bill" title="Click Here to quickly switch to a different Bill">
+    {{source}}
+</a>
+
+{% else %}
+<a href="javascript:;" onmousedown="toggleSlide('choosebill');" class="earmark_bill" title="Click to choose an Appropriations Bill">Bringing Citizen Oversight to Congressional Spending</a>
+{% endif %}
+<div id="choosebill" style="display:none; overflow:hidden; height:250px;">
+<br />
+
+
+<div id="topbill_navcontainer">
+<span class="topbill_header">House Bills</span>
+<ul id="subnavlist">
+<li id="subactive"><a href="/2008-house-defense/" title="Defense" class="topbill_bill">Defense Appropriations - Fiscal Year, 2008</a></li>
+<li><a href="/2008-house-laborhhs/" title="Labor, Health and Human Services, and Education" class="topbill_bill">Labor, Health and Human Services, and Education Appropriations - Fiscal Year, 2008</a></li>
+</ul>
+
+
+<span class="topbill_header">Senate Bills</span>
+<ul id="subnavlist">
+<li id="subactive"><a href="/2008-senate-laborhhs/" title="Labor, Health and Human Services, and Education" class="topbill_bill">Labor, Health and Human Services, and Education Appropriations - Fiscal Year, 2008</a></li>
+</ul>
+
+
+
+
+</div>
+
+
+</div>
+
+<!--
+<a href="/earmarkwatch" class="earmark_bill" title="Senate Labor, Health and Human Services, and Education, FY 2008">Senate Labor, Health and Human Services, and Education, FY 2008</a></div>-->
+   </div>
+   </div>
+
+	<div style="margin:10px 0 10px 0; background-color:#fffdd7; padding:10px; font-size:108%; border:1px solid #d1b85b;"><p><strong>PLEASE NOTE:</strong> EarmarkWatch is an experimental distributed research project that contains data for Fiscal Year 2008 earmarks from the House and Senate Labor-HHS-Education bills and the 2008 House Defense Bill.</p> 
+		
+		<p>It does not contain <strong>2009 earmarks</strong>. Congress released earmark disclosures for an omnibus bill that included three of the twelve regular appropriations bills—Defense, Homeland Security, and Military Construction/Veterans Affairs—for fiscal year 2009.</p>
+		<p> A downloadable spreadsheet listing those earmarks is available from <a href="http://www.taxpayer.net/earmarks.php">Taxpayers for Common Sense</a> (<a href="http://www.taxpayer.net/user_uploads/file/Appropriations/fy2009/minibuscompletev.2.xls">xls</a>). </p></div>
+
+   <div id="bd">
+	<div id="yui-main">
+	<div class="yui-b"><div class="yui-g">
+
+
+	{% block content %}{% endblock %}
+
+
+	</div>
+
+		<div class="yui-g">
+		<br /><br />
+
+		</div>
+
+	</div>
+
+	</div>
+
+	<div class="yui-b">
+
+	<div id="leftpanel">
+    <div id="user_leftcol">
+    <div id="user_left_box">
+{% if user.is_authenticated %}
+Signed in as <a href="{% url user_view user.username %}" title="That's you!">{{user.username}}</a>
+{% else %}
+<a href="{% url login %}{{next_path|escape}}">Sign In</a> or
+<a href="{% url register %}{{next_path|escape}}">Register</a>
+to contribute research or to add a comment.
+{% endif %}
+</span>
+</div>
+
+<div id="new_navcontainer">
+<ul id="navlist">
+{% if user.is_authenticated %}
+    <li><a href="{% url user_view user.username %}" title="Home">Home</a></li>
+{% else %}
+
+<li><a href="{% url index %}" title="Home">Home</a></li>
+{% endif %}
+
+
+{% if source %}
+<li><a href="{% url search source.year,source.chamber,source.type %}" title="Find an Earmark">Find an Earmark</a></li>
+<li><a href="{% url random_earmark source.year,source.chamber,source.type %}" title="Get a Random Earmark">Get a Random Earmark</a></li>
+{% endif %}
+
+<li><a href="{% url faq %}">Earmark FAQ</a></li>
+
+
+{% if user.is_authenticated %}<li><a href="{% url logout %}" title="Sign Out">Sign Out</a></li></ul></div>
+
+{% else %}
+
+</ul></div>
+
+{% endif %}
+
+
+{# TODO: replace this with something that draws from Source table? #}
+
+{% if source and not earmark%}
+
+<span class="disclaimer_lrg">You are currently viewing {{source.get_chamber_display}} {{source.get_type_display}} Earmarks</span>
+<br /><br />
+
+{% ifequal source.get_type_display "Defense" %}
+{% ifequal source.get_chamber_display "House" %}
+<strong>Top Defense Sponsors:</strong><br />
+<a href="/2008-house-defense/sponsor/387/">Rep. Murtha</a><br />
+<a href="/2008-house-defense/sponsor/333/">Rep. Lewis</a><br />
+<a href="/2008-house-defense/sponsor/313/">Rep. Kingston</a><br />
+<a href="/2008-house-defense/sponsor/535/">Rep. Young</a><br />
+<a href="/2008-house-defense/sponsor/508/">Rep. Visclosky</a><br />
+<a href="/2008-house-defense/sponsor/383/">Rep. Moran</a><br />
+<br /><br />
+{% endifequal %}
+{% endifequal %}
+
+
+{% else %}
+<!-- <div id="bill_spacer"></div> -->
+{% endif %}
+
+{% if not source %}
+Select an appropriations bill from the list below:
+<br /><br />
+{% endif %}
+
+
+<div id="bill_navcontainer">
+<span class="bill_header">House Bills</span>
+<ul id="subnavlist">
+<li id="subactive"><a href="/2008-house-defense/" title="Defense">Defense*</a></li>
+<li><a href="/2008-house-laborhhs/" title="Labor, Health and Human Services, and Education">Labor/HHS/EDU</a></li>
+</ul>
+
+<span class="bill_header">Senate Bills</span>
+<ul id="subnavlist">
+<li id="subactive"><a href="/2008-senate-laborhhs/" title="Labor, Health and Human Services, and Education">Labor/HHS/EDU</a></li>
+</ul>
+</div>
+<div style="margin-bottom:10px; border-bottom:1px solid #ccc;  padding-bottom:40px; ">
+*View and navigate the FY08 House Defense Earmarks
+<a href="{% url mapped %}">on a map</a>
+</div>
+
+<!-- removed logos -->
+<span class="disclaimer_lrg">Get a glimpse of what's going on at Earmark Watch:</span>
+<br /><br />
+<div id="new_navcontainer">
+<span class="behind_header">Site Activity</span>
+<ul id="navlist">
+<li><a href="{% url recent_research %}">Recently Researched</a></li>
+<li><a href="{% url recent_comments %}">Recent Comments</a></li>
+<li><a href="{% url most_comments %}">Most Commented</a></li>
+</ul>
+
+<div style="border:1px solid #669933; padding: 5px;"><span class="behind_header">{% total_researched %} researched!</span></div>
+
+</div>
+
+
+</div>  <!-- ends left panel div -->
+
+
+
+
+	</div>  <!-- ends yui left nav -->
+
+
+	</div>
+
+	</div>
+
+   <div id="ft">
+   <br /><br />
+ <div id="footer_box">
+
+<div id="footer_left"><strong>About Taxpayers for Common Sense</strong><br />
+TCS is an independent voice for American taxpayers and is dedicated to cutting wasteful government spending and
+subsidies in order to achieve a responsible and efficient government that operates within its means. [&nbsp;<a href="http://www.taxpayer.net">visit Taxpayer.net</a>&nbsp;]</div>
+ <div id="footer_middle"><strong>About Sunlight Foundation:</strong><br />
+The Sunlight Foundation was founded in 2006 with the goal of using technology to enable citizens to learn more about what their elected representatives are doing,
+to help reduce corruption, ensure greater transparency and&#133; [&nbsp;<a href="http://www.sunlightfoundation.com">visit SunlightFoundation.com</a>&nbsp;]</div>
+ <div id="footer_right">
+ <strong>Useful Links:</strong><br />
+<a href="http://www.opensecrets.org">OpenSecrets.org</a><br />
+<a href="http://www.fedspending.org">FedSpending.org</a><br />
+<a href="http://www.maplight.org">MAPlight.org</a><br />
+<a href="http://www.sunlightfoundation.com/resources">Insanely Useful Sites</a><br />
+<a href="http://www.sunlightlabs.com/contact/contact.php">Report a bug</a>
+ </div>
+
+ </div>
+ <br />
+<div id="footer_disclaimer">
+<p class="disclaimer">This Site may contain links to Internet sites that are not operated by Sunlight Foundation. These links are provided as a service and do not imply any endorsement of the activities or content of these sites, nor any association with their operators. Sunlight Foundation does not control these Internet sites and is not responsible for their content, security, or privacy practices. We urge you to review the privacy policy posted on web sites you visit before using the site or providing personal information.
+</p></div>
+
+</div> <!--  ends das foot -->
+
+</div> <!--  ends it all -->
+
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-1265484-10";
+urchinTracker();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+<table cellpadding="10" cellspacing="10" border="0">
+<tr>
+<td><img src="http://media.sunlightprojects.org/images/popuppol/{{sponsor.photo}}" alt="{{sponsor}}" width="75" class="sponsor_image">
+</td>
+<td>
+<div id="sponsor_head_right">
+<big><h1 class="green_header_bold">{{sponsor.title}}. {{sponsor.firstname}} {{sponsor.lastname}} ({{sponsor.party}}-{{sponsor.state}})</h1></big>
+<span class="welcome"><a href="{{sponsor.website}}" target="_new">{{sponsor.website}}</a></span></div>
+</td>
+</tr>
+</table>
+
+
+<h2 class="red_header">{{sponsor}} has {{sponsor.earmarks.count}} {{source.get_type_display}}
+earmarks totalling ${{amount|intcomma}}</h2>
+
+
+<span class="sponsor_rank">For this appropriations bill, {{sponsor}} ranks in the
+ {{percentile|ordinal}}&nbsp;percentile.</span>
+<br />
+{% include "earmark_listing.html" %}
+
+ {% ifequal source.get_type_display "Defense" %}
+{% ifequal source.get_chamber_display "House" %}
+<span style="display:block; text-align:right; padding:3px;" class="welcome">(View {{sponsor.firstname}} {{sponsor.lastname}}'s <a href="/2008-house-laborhhs/sponsor/{{sponsor.id}}">Labor, Health and Human Services and Education Earmarks</a>)</span>
+{% endifequal %}
+{% endifequal %}
+
+
+ {% ifequal source.get_type_display "Labor, Health and Human Services, and Education" %}
+{% ifequal source.get_chamber_display "House" %}
+<span style="display:block; text-align:right; padding:3px;" class="welcome">(View {{sponsor.firstname}} {{sponsor.lastname}}'s <a href="/2008-house-defense/sponsor/{{sponsor.id}}">Defense Earmarks</a>)</span>
+{% endifequal %}
+{% endifequal %}
+
+
+{% endblock content %}

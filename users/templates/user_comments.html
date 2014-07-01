@@ -1,0 +1,38 @@
+{% extends "user_base.html" %}
+
+{% block user_content %}
+
+{% ifnotequal total 0 %}
+<p class="profile_heads">
+{% ifequal user.id the_user.id %}
+    You have
+{% else %}
+    {{ the_user.username }} has
+{% endifequal %}
+ commented on the following earmarks:</p>
+
+<div id="paginate_box">
+{{page.start_index}}-{{page.end_index}} of {{page.paginator.count}}
+{% if page.has_previous %}<a href="{% url user_view_tab_page the_user.username "comments" page.previous_page_number %}" class="pagination_top">&laquo; Prev</a>{% endif %}  {% if page.has_next %}<a href="{% url user_view_tab_page the_user.username "comments" page.next_page_number %}" class="pagination_top">Next &raquo;</a>{% endif %}
+</div>
+{% for comment in page.object_list %}
+<div id="yellowbox">
+<a href="{% url earmark_view comment.earmark_id %}#comment_{{comment.id}}" class="taxpayers">&#8220;{{comment.earmark}}&#8221;</a>
+</div><br />
+{% endfor %}
+
+<div id="paginate_box">
+{{page.start_index}}-{{page.end_index}} of {{page.paginator.count}}
+{% if page.has_previous %}<a href="{% url user_view_tab_page the_user.username "comments" page.previous_page_number %}" class="pagination_top">&laquo; Prev</a>{% endif %}  {% if page.has_next %}<a href="{% url user_view_tab_page the_user.username "comments" page.next_page_number %}" class="pagination_top">Next &raquo;</a>{% endif %}
+</div>
+<p class="profile_heads">
+{% ifequal user.id the_user.id %}
+    You have
+{% else %}
+    {{ the_user.username }} has
+{% endifequal %}
+    not commented on any earmarks.</p>
+
+{% endifnotequal %}
+
+{% endblock user_content %}

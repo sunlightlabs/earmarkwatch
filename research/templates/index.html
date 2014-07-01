@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{%load humanize%}
+{% load count %}
+
+{% block content %}
+
+
+{% if user.is_authenticated %}
+<h1 class="header_underline">Welcome back, {{user.username}}!</h1>
+
+<p class="welcome">You have contributed research to
+<a href="{% url user_view user.username %}earmarks">{{researched}} earmarks</a>, worth <strong>${{research_sum|intcomma}}</strong> and
+<a href="{% url user_view user.username %}comments">commented on {{commented_on}}</a>.  Members have contributed research to <strong>{% total_researched %}</strong> earmarks so far.</p>
+
+{% else %}
+
+<br />
+{% for e in random %}
+
+    {% if not source %}
+    <span class="bill_demark">{{e.source}}</span>
+    {% endif %}
+
+    <div id="taxpayers_research"><a href="{% url earmark_view e.id %}" class="taxpayers">&#8220;{{e}}&#8221;</a></div>
+        <div id="activity">
+        <div style="width:100%; max-width:570px;">
+        <div id="activity_left">
+    Sponsor{{e.sponsors.count|pluralize}}:
+    {% for sponsor in e.sponsors.all %}
+        <a href="{% url sponsor_view e.source.year,e.source.chamber,e.source.type,sponsor.id %}" class="sponsor">{{sponsor}}</a>
+    {% endfor %}
+    </div>
+
+    <div id="activity_right">
+    (<a href="{% url earmark_view e.id%}#comments">{{e.comment_set.count}}&nbsp;Comments</a>,
+    <span class="percent">{{e.percent_answered|floatformat:0}}% Complete)</span>
+   </div>
+   </div>
+
+   </div>
+{% endfor %}
+
+
+
+<h1 class="header_underline">Greetings, Concerned Citizen!</h1>
+<!-- <p class="welcome">Welcome to Earmark Watch, sponsored by Sunlight Foundation and Taxpayers for Common Sense. </p><br /> -->
+<p class="welcome">
+Here's your chance to investigate earmarks&ndash;those spending measures inserted by members of Congress into bills that direct
+taxpayer dollars to their pet projects. Are members using earmarks to meet pressing needs? Reward political supporters?
+Are they good public policy, or vehicles for pure pork? Every earmark is different, and we currently have over 3,000 of them
+online, ready and waiting for you to dig into.<img src="/static/images/earmarks.jpg" align="right">
+<br /><br />
+
+<p class="welcome">
+The research framework we're providing asks you specific questions about the recipient of the earmark and the member who sponsored it,
+and provides links to the sources of information you can search for answers. </p><br /><p class="welcome">You will also have an opportunity to provide additional
+information from your own research. We offer some suggestions and ideas for additional information you can find, but feel free to
+follow your own instincts.
+</p><br /><br />
+<big><p class="welcome_big">To join in this effort, simply <a href="{% url register %}" class="welcome_big">create an account.</a></p></big>
+<br /><br /><br />
+<p class="disclaimer">* "The Brains," Harper's Weekly p.992 October 12, 1871.</p>
+
+{% endif %}
+
+
+</div> <!--  end the first YUI row -->
+
+
+<div class="yui-g">
+
+
+{% if user.is_authenticated %}
+<h3 class="red_header_sm">A Fresh, Incomplete Earmark <span class="disclaimer">(just for you)</span></h2>
+
+{% for e in random %}
+
+    {% if not source %}
+    <span class="bill_demark">{{e.source}}</span>
+    {% endif %}
+
+    <div id="taxpayers_research"><a href="{% url earmark_view e.id %}" class="taxpayers">&#8220;{{e}}&#8221;</a></div>
+        <div id="activity">
+        <div style="width:100%; max-width:570px;">
+        <div id="activity_left">
+    Sponsor{{e.sponsors.count|pluralize}}:
+    {% for sponsor in e.sponsors.all %}
+        <a href="{% url sponsor_view e.source.year,e.source.chamber,e.source.type,sponsor.id %}" class="sponsor">{{sponsor}}</a>
+    {% endfor %}
+    </div>
+
+    <div id="activity_right">
+    (<a href="{% url earmark_view e.id%}#comments">{{e.comment_set.count}}&nbsp;Comments</a>,
+    <span class="percent">{{e.percent_answered|floatformat:0}}% Complete)</span>
+   </div>
+   </div>
+
+   </div>
+{% endfor %}
+<br />
+<h3 class="red_header_sm">Recently Researched Earmarks <span class="disclaimer">(site-wide)</span></h2>
+
+{% include "earmark_listing.html" %}
+
+
+<h3 class="red_header_sm">Recent Comments <span class="disclaimer">(site-wide)</span></h2>
+
+    {% for c in comments %}
+    <div id="yellowcommentbox">
+<a href="{% url earmark_view c.earmark_id %}#comment_{{c.id}}" class="taxpayers">{{c.user}} on &#8220;{{c.earmark.description}}&#8221;</a>
+    </div><br />
+    {% endfor %}
+
+
+
+{% endif %}
+
+{% endblock content %}

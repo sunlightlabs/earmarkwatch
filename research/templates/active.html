@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{%load humanize%}
+{% block content %}
+<h3 class="red_header_sm">{{source.get_chamber_display}} {{source.get_type_display}} Earmarks</h2>
+{% include "earmark_listing.html" %}
+
+<p class="welcome_big">&raquo; <a href=".">Get another set of random &#8220;{{source.get_chamber_display}} {{source.get_type_display}}&#8221; Earmarks</a></p>
+
+{% endblock content %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block styles %}
+<link type="text/css" rel="stylesheet" href="http://yui.yahooapis.com/2.3.1/build/autocomplete/assets/skins/sam/autocomplete.css">
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="http://yui.yahooapis.com/2.3.1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.3.1/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.3.1/build/autocomplete/autocomplete-min.js"></script>
+<script type="text/javascript" src="/static/scripts/tabber.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="tabber">
+
+    <div class="tabbertab {% ifequal tab "state" %}tabbertabdefault{% endifequal %}">
+        <h2>By State</h2>
+        <div class="search_form_box">
+        <form action="." method="GET">
+        {{form.state}} &nbsp; <input type="submit" value="Search By State" />
+        </form>
+        </div>
+    </div>
+
+    <div class="tabbertab {% ifequal tab "sponsor" %}tabbertabdefault{% endifequal %}">
+        <h2>By Sponsor</h2>
+        <div class="search_form_box">
+        <form action="." method="GET">
+        {{form.sponsor}} &nbsp; <input type="submit" value="Search By Sponsor" />
+        </form>
+        </div>
+    </div>
+
+    <div class="tabbertab {% ifequal tab "description" %}tabbertabdefault{% endifequal %}">
+        <h2>By Description</h2>
+        <div class="search_form_box">
+        <form action="." method="GET">
+        {{form.text}} &nbsp; <input type="submit" value="Search By Description" />
+        </form>
+        </div>
+    </div>
+
+    <div class="tabbertab {% ifequal tab "recipient" %}tabbertabdefault{% endifequal %}">
+        <h2>By Recipient</h2>
+        <div class="search_form_box" id="recipient_autocomp">
+        <form action="." method="GET">
+        {{form.recipient}} &nbsp; <input type="submit" value="Search By Recipient" />
+        </form>
+        </div>
+    </div>
+
+</div>
+
+
+
+{% if earmarks %}
+<br /><h3 class="red_header">{{ earmarks|length }} earmarks totalling ${{total|intcomma}} for {{search_term}}</h3>
+<!-- <br /><h3 class="red_header">{{ earmarks|length }} {{source.get_chamber_display}} {{source.get_type_display}} earmarks totalling ${{total|intcomma}} for {{search_term}}</h3> -->
+
+{% include "earmark_listing.html" %}
+
+{% else %}
+{% if search_term %}
+<h2 class="red_header">No {{source.get_chamber_display}} {{source.get_type_display}} earmarks found for {{search_term}}.</h2>
+
+{% endif %}
+{% endif %}
+
+<script type="text/javascript">
+    var recipients = {{recipients}};
+    var recipDS = new YAHOO.widget.DS_JSArray(recipients);
+    var myAutoComp = new YAHOO.widget.AutoComplete("id_recipient",
+                                                   "recipient_autocomp",
+                                                   recipDS);
+</script>
+
+{% endblock content %}

@@ -1,0 +1,27 @@
+{% extends "user_base.html" %}
+{% load humanize %}
+
+{% block user_content %}
+{% ifequal user the_user %}
+
+<p class="profile_heads">Current Account Options:</p>
+
+
+
+<div class="form-container">
+<form enctype="multipart/form-data" method="post" action="{% url update_profile %}">
+<fieldset>
+<legend>Update Profile</legend>
+
+<table>
+{{profile_form.as_table}}
+</table>
+<br />
+<input type="submit" value="update" />
+</form>
+</fieldset>
+</div>
+
+
+{% endifequal %}
+{% endblock user_content %}

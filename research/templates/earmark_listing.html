@@ -1,0 +1,26 @@
+{% load humanize %}
+
+{% for e in earmarks %}
+
+    {% if not source %}
+    <span class="bill_demark">{{e.source}}</span>
+    {% endif %}
+
+    <div id="taxpayers_research"><a href="{% url earmark_view e.id %}" class="taxpayers">&#8220;{{e}}&#8221;</a></div>
+        <div id="activity">
+        <div style="width:100%; max-width:570px;">
+        <div id="activity_left">
+    Sponsor{{e.sponsors.count|pluralize}}:
+    {% for sponsor in e.sponsors.all %}
+        <a href="{% url sponsor_view e.source.year,e.source.chamber,e.source.type,sponsor.id %}" class="sponsor">{{sponsor}}</a>
+    {% endfor %}
+    </div>
+    
+    <div id="activity_right">
+    (<a href="{% url earmark_view e.id%}#comments">{{e.comment_set.count}}&nbsp;Comments</a>,
+    <span class="percent">{{e.percent_answered|floatformat:0}}% Complete)</span>
+   </div>
+   </div>
+   
+   </div>
+{% endfor %}

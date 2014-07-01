@@ -1,0 +1,73 @@
+{% extends "user_base.html" %}
+{% load humanize %}
+{% load count %}
+
+{% block user_content %}
+
+<p class="profile_heads">
+
+{% if new_comments %}
+<a href="{% url user_view the_user.username %}messages">
+{{new_comments}} new message{{new_comments|pluralize}} since your last login.
+</a><br /><br />
+{% endif %}
+
+{% ifequal user.id the_user.id %}
+
+<span class="profile_message">Members have contributed research to <strong>{% total_researched %}</strong> earmarks so far!</span><br />
+
+
+    You have
+{% else %}
+    {{ the_user.username }} has
+{% endifequal %}
+contributed research to <a href="earmarks">{{the_user.researched_count}} Earmarks</a>
+(worth <strong>${{the_user.research_sum|intcomma}}</strong>) and commented on <a href="comments">{{the_user.comment_count}}
+Earmarks</a>.
+
+
+</p>
+
+
+
+{% ifequal user.id the_user.id %}
+{% ifequal the_user.researched.count 0 %}
+{% ifequal the_user.comment_count 0 %}
+<br />
+<h2 class="green_header">You're new here, aren't you? Here's the deal... </h2>
+
+<p class="welcome">
+Choose a bill, find an earmark and contribute some research!</p><br />
+<p class="welcome_big">
+<a href="/2008-house-defense/" class="earmark_bill">House Defense Appropriations, FY 2008</a><br />
+<a href="/2008-house-laborhhs/" class="earmark_bill">House Labor-HHS-Education, FY 2008</a><br />
+<a href="/2008-senate-laborhhs/" class="earmark_bill">Senate Labor-HHS-Education, FY 2008</a><br />
+</p>
+{% endifequal %}
+{% endifequal %}
+{% endifequal %}
+
+
+
+{% ifnotequal the_user.researched.count 0 %}
+<h2 class="red_header">Recently Researched:</h2>
+
+{% with the_user.researched as earmarks %}
+{% include "earmark_listing.html" %}
+{% endwith %}
+
+{% endifnotequal %}
+
+{% ifnotequal the_user.comment_count 0 %}
+<h2 class="blue_header">Recently Commented on:</h2>
+
+{% for comment in the_user.comments %}
+<div id="yellowcommentbox">
+<a href="{% url earmark_view comment.earmark_id %}#comment_{{comment.id}}" class="taxpayers">&#8220;{{comment.earmark}}&#8221;</a>
+</div><br />
+   {% endfor %}
+
+{% endifnotequal %}
+
+
+{% endblock user_content %}

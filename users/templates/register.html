@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+<form method="post" action="{% url register %}">
+<fieldset>
+<legend>Register</legend>
+<table class="logintable">
+{{form.as_table}}
+</table>
+<input type="hidden" name="next" value="{{next}}" />
+
+<br /><input type="submit" value="register and start researching" />
+</form>
+<br /><br /><p class="warning">*Please be aware that the Username you choose will be <strong>publicly</strong> associated with your research contributions, but
+we will <strong>never</strong> display (or sell) your email address.</p>
+</fieldset>
+
+Already have an account? <a href="{% url login %}">Sign in</a>
+
+</div>
+
+</div> <!--  end the first YUI row  -->
+
+<div class="yui-g">
+
+{% endblock content %}

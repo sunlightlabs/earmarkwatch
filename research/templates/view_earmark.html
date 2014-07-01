@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+<link rel="alternate" type="application/rss+xml" title="RSS feed for {{earmark}}" href="/rss{% url earmark_view earmark.id %}">
+
+
+{% if not user.is_authenticated and welcome %}
+
+<div id="messagebox">
+<h1 class="grey_header">
+Welcome to Earmark Watch! </h1>
+<p class="messagebox_sm">
+Here's your chance to dig into earmarks. Our earmark tool can help you find out if members of
+Congress are using earmarks to meet pressing needs or pass out political favors. <br />
+</p>
+<p class="messagebox">
+To join in this effort, <a href="{% url register %}{{next_path|escape}}">create an account</a> or
+<a href="{% url login %}{{next_path|escape}}">sign in</a>
+
+</p></div>
+{% endif %}
+
+
+</div> <!--  end the first YUI row -->
+
+
+<div class="yui-g">
+
+<div id="taxpayers_main">
+<p class="taxpayers_main">&#8220;{{earmark}}&#8221;</p>
+<span class="taxpayers_labels">Sponsor{{earmark.sponsors.count|pluralize}}:</span>
+<span class="taxpayers_data">
+	 {% for sponsor in earmark.sponsors.all %}
+	 <a href="{% url sponsor_view source.year,source.chamber,source.type,sponsor.id %}" class="sponsor" title="{{sponsor}}">{{sponsor}}</a>
+	 {% endfor %}
+</span>
+<span class="rss_box">&nbsp;<a href="/rss/earmark/{{earmark.id}}" class="no_bg" title="RSS Feed for this Earmark"><img src="/static/images/feed-icon-12x12.gif"></a></span>
+</div>
+
+<div id="comment_on_this">
+
+	{% if comments|length_is:0 %}
+	{% if user.is_authenticated %}
+	<a href="#comment" title="comment on this earmark">Comment on this Earmark</a>{% endif %}
+{% else %}
+	(<a href="#comments" title="comment on this earmark">{{ comments|length }} Comments</a>)
+{% endif %}
+
+</div>
+
+<!-- end taxpayers module / start citizen data module -->
+
+<!--  Multi-recip bit -->
+{% ifequal earmark.location_set.count 1 %}
+
+
+<h1 class="blue_header">Citizen Contributed Data
+
+{% if not no_research %}
+ <span class="contributed_percent">({{earmark.percent_answered|floatformat:0}}% Complete)</span>
+{% endif %}
+
+</h1>
+<div id="contributed">
+{% if user.is_authenticated %}
+
+{% if no_research %}
+<p class="welcome">No data has been contributed for this earmark. <span class="welcome_strong">Be the first to contribute!</span></p>
+{% endif %}
+
+{% else %}
+
+{% if no_research %}
+<p class="welcome">No data has been contributed for this Earmark.
+<a href="{% url login %}{{next_path|escape}}">Sign in</a> or
+<a href="{% url register %}{{next_path|escape}}">Register</a>
+to begin the research process or to comment on this earmark!</p>
+{% endif %}
+
+{% endif %}
+
+{% if questions.website.answer %}
+<span class="contributed_labels">Recipient Web Site:</span>&nbsp;
+<div id="answer{{questions.website.answer_id}}" class="answerbox">{{questions.website.answer|escape|urlize}}<br /></div>
+{% endif %}
+
+
+{% if questions.addr_street.answer or questions.addr_city.answer or questions.addr_state.answer or questions.addr_zip.answer %}
+<span class="contributed_labels">Recipient Address:</span>&nbsp;
+
+<!-- custom flagging code for address -->
+{% if address_flagged %}
+<sup id="flagaddress" class="flagged">flagged</sup>
+{% else %}
+<sup id="flagaddress"><a href="javascript:flagAddress({{questions.addr_street.answer_id|default:0}}, {{questions.addr_city.answer_id|default:0}}, {{questions.addr_state.answer_id|default:0}}, {{questions.addr_zip.answer_id|default:0}});" class="flag">(Flag)</a></sup>
+{% endif %}
+
+<div id="answeraddress" class="answerbox">
+{% if questions.addr_street.answer %}{{questions.addr_street.answer|escape}}<br />{% endif %}
+{% if questions.addr_city.answer %}{{questions.addr_city.answer|escape}},{% endif %}
+{% if questions.addr_state.answer %}{{questions.addr_state.answer|escape}}<br />{% endif %}
+{% if questions.addr_zip.answer %}{{questions.addr_zip.answer|escape}}{% endif %}
+</div>
+{% endif %}
+
+{% if questions.addr_state.answer and questions.addr_street.answer and questions.addr_city.answer %}
+<span class="contributed_labels">Recipient address as provided by Sponsor(s):</span><span class="disclaimer"> (courtesy of Taxpayers for Common Sense)</span>
+<div id="answer" class="answerbox">{{earmark.location.street}} {{earmark.location.city}}, {{earmark.location.state}}</div>
+{% endif %}
+
+
+{% if questions.description.answer %}
+<span class="contributed_labels">Short Description of Recipient Organization:</span>&nbsp;
+<div id="answer{{questions.description.answer_id}}" class="answerbox">{{questions.description.answer|escape|linebreaksbr}}</div>
+{% endif %}
+
+{% if questions.execs_listed.answer %}
+<span class="contributed_labels">Are Top Personnel Listed on the Site?</span>&nbsp;
+<div id="answer{{questions.execs_listed.answer_id}}" class="answerbox">{{questions.execs_listed.answer|escape}}</div>
+{% endif %}
+
+
+{% if questions.proj_mentioned.answer %}
+<span class="contributed_labels">Is the Project Mentioned on the Site?</span>&nbsp;
+<div id="answer{{questions.proj_mentioned.answer_id}}" class="answerbox">{{questions.proj_mentioned.answer|escape}}</div>
+{% endif %}
+
+{% if questions.contracts.answer %}
+<span class="contributed_labels">Does the Recipient have Federal Contracts?</span>&nbsp;
+<div id="answer{{questions.contracts.answer_id}}" class="answerbox">{{questions.contracts.answer|escape}}</div>
+{% endif %}
+
+{% ifnotequal questions.contracts.answer "No" %}
+{% if questions.contracts_url.answer %}
+<span class="contributed_labels">Link to the Recipient's Federal Contracts (Fedspending.org):</span>&nbsp;
+<div id="answer{{questions.contracts_url.answer_id}}" class="answerbox">{{questions.contracts_url.answer|escape|urlize}}</div>
+{% endif %}
+{% endifnotequal %}
+
+{% if questions.grants.answer %}
+<span class="contributed_labels">Does the Recipient have Federal Grants?</span>&nbsp;
+<div id="answer{{questions.grants.answer_id}}" class="answerbox">{{questions.grants.answer|escape}}</div>
+{% endif %}
+
+{% ifnotequal questions.grants.answer "No" %}
+{% if questions.grants_url.answer %}
+<span class="contributed_labels">Link to the Recipient's Federal Grants (Fedspending.org):</span>&nbsp;
+<div id="answer{{questions.grants_url.answer_id}}" class="answerbox">{{questions.grants_url.answer|escape|urlize}}</div>
+{% endif %}
+{% endifnotequal %}
+
+{% if questions.contributors.answer %}
+<span class="contributed_labels">Have employees of the recipient collectively contributed more than $20,000 to candidates for federal office during the current and last election cycle?:</span>&nbsp;
+
+<div id="answer{{questions.contributors.answer_id}}" class="answerbox">{{questions.contributors.answer|escape}}</div>
+{% endif %}
+
+{% if questions.sponsor_credit.answer %}
+<span class="contributed_labels">Does a sponsoring member take credit?</span>&nbsp;
+<div id="answer{{questions.sponsor_credit.answer_id}}" class="answerbox">{{questions.sponsor_credit.answer|escape}}</div>
+{% endif %}
+
+{% if questions.recipient_lobbying.answer %}
+<span class="contributed_labels">Did the recipient hire federal lobbyists?</span>&nbsp;
+<div id="answer{{questions.recipient_lobbying.answer_id}}" class="answerbox">{{questions.recipient_lobbying.answer|escape}}</div>
+{% endif %}
+
+{% if questions.lobbying_forms.answer %}
+<span class="contributed_labels">URL of Lobbying Data from OpenSecrets</span>&nbsp;
+<div id="answer{{questions.lobbying_forms.answer_id}}" class="answerbox">{{questions.lobbying_forms.answer|escape|urlize}}</div>
+{% endif %}
+
+
+{% if not no_research %}
+<span class="contributed_labels">Research contributed by:</span>
+<div class="answerbox">
+{% for c in contributors %}
+<a href="{% url user_view c.username %}">{{c.username}}</a>{% if not c.last %},{% endif %}
+{% endfor %}
+</div>
+{% endif %}
+</div> <!-- ends the contributed module -->
+{% if user.is_authenticated %}
+{% if no_research %}
+<img src="/static/images/arrow_down.gif">
+{% endif %}
+{% endif %}
+
+
+{% if user.is_authenticated %}
+
+{% if any_editable %}
+
+<a name="missing_data"></a><h1 class="grey_header">Missing and/or Incomplete Data</h1>
+<div class="form-container">
+<div id="tip_bordered">*It is not required that you answer every question. This is a collaborative project. Answer only what you are able to based on your research.  Other members will help complete the research for this earmark, if necessary.</div>
+<form method="post" action=".">
+
+{% if questions.website.editable or questions.addr_street.editable or questions.addr_city.editable or questions.addr_state.editable or questions.addr_zip.editable or questions.description.editable or questions.execs_listed.editable or questions.proj_mentioned.editable %}
+		<fieldset>
+		<legend>Recipient Web Site Details</legend
+		<div>
+Use <a href="http://www.google.com" target="_new">Google</a> or your favorite search engine to track down the <span class="bold">web site</span> for the recipient of the earmark; using that site, see if you can find additional information about the recipient.
+(<a href="javascript:;" onmousedown="toggleSlide('sitedetails');">more</a>)
+<div id="sitedetails" style="display:none; overflow:hidden; height:300px; text-align:left;">
+Can you find a Web site for the recipient of the earmark? What we're looking for is the organization's official site;
+if you can, cut and paste the Web site address into the box below. If you can't, leave the URL box blank.
+<br /><br />
+Next, see if you can find a physical address for the recipient, either on its official Web site or by using
+Web business directory? (Some general ones you might want to try: <a href="http://www.business.com" target="_new">business.com</a>,
+<a href="" target="_new">yellowpages.com</a>, <a href="http://www.infospace.com" target="_new">infospace.com</a>, <a href="http://www.hoovers.com/free" target="_new">hoovers.com/free</a>.)
+If you find an address, enter it in the space provided.
+<br /><br />
+See if the recipient offers other information about itself, like a description on an "about" page, or the names of the organizations key
+personnel--a list of top executives, or the names of the board of directors, or the list of trustees, officers and faculty of a university.
+Finally, see if there's any mention on the site--most likely a press release or announcement--of the earmark they're getting.
+</div>
+
+
+					</div>
+
+<br />
+{% if questions.website.editable %}
+<div>Recipient Web Site Address<br /><input id="website" type="text" name="website" value="{{questions.website.answer|escape}}" size="35" /></div><br />
+{% endif %}
+
+
+{% if questions.addr_state.answer and questions.addr_street.answer and questions.addr_city.answer %}
+<br />
+{% else %}
+<span class="green_appropriated">Recipient Address as provided by Sponsor(s):</span><span class="disclaimer">(courtesy of Taxpayers for Common Sense)</span>
+<div id="answer" class="answerbox">{{earmark.location.street}} {{earmark.location.city}}, {{earmark.location.state}}</div>
+{% endif %}
+
+{% if questions.addr_street.editable %}<div>Street Address:<br /> <input id="addr_street" type="text" name="addr_street" value="{{questions.addr_street.answer|escape}}" size="35" /></div>{% endif %}
+{% if questions.addr_city.editable %}<div>City:<br /><input id="addr_city" type="text" name="addr_city" value="{{questions.addr_city.answer|escape}}" size="30" /></div>{% endif %}
+{% if questions.addr_state.editable %}<div>State: <br /><input id="addr_state" type="text" name="addr_state" value="{{questions.addr_state.answer|escape}}" size="15" /></div>{% endif %}
+{% if questions.addr_zip.editable %}<div>Zipcode: <br /><input id="addr_zip" type="text" name="addr_zip" value="{{questions.addr_zip.answer|escape}}" size="9" /></div>	{% endif %}
+
+
+<br />
+
+			{% if questions.description.editable %}
+
+
+			<div>
+			Short Description of Recipient Organization<br />
+<textarea id="description" name="description" cols="50" rows="2">{{questions.description.answer|escape}}</textarea>
+			</div>
+			<br />
+			{% endif %}
+
+
+{% if questions.execs_listed.editable %}
+<div class="controlset">
+<span class="label">Are Top Personnel Listed on the Site?</span><p>
+				<input name="execs_listed" id="execs_listed_yes" value="Yes" type="radio" {% ifequal questions.execs_listed.answer "Yes" %}checked="checked"{% endifequal %} />
+				<label for="execs_listed_yes">Yes</label>
+
+				<input name="execs_listed" id="execs_listed_no" value="No" type="radio" {% ifequal questions.execs_listed.answer "No" %}checked="checked"{% endifequal %} />
+				<label for="execs_listed_no">No</label>
+
+				<input name="execs_listed" id="execs_listed_na" value="N/A" type="radio" {% ifequal questions.execs_listed.answer "N/A" %}checked="checked"{% endifequal %} />
+				<label for="execs_listed_na">N/A</label>
+				</p>
+
+			</div>
+				{% endif %}
+
+{% if questions.proj_mentioned.editable %}
+			<div class="controlset">
+<span class="label">Is the Project Mentioned on the Site?</span>
+				<input name="proj_mentioned" id="proj_mentioned_yes" value="Yes" type="radio" {% ifequal questions.proj_mentioned.answer "Yes" %}checked="checked"{% endifequal %}/>
+				<label for="proj_mentioned_yes">Yes</label>
+				<input name="proj_mentioned" id="proj_mentioned_no" value="No" type="radio" {% ifequal questions.proj_mentioned.answer "No" %}checked="checked"{% endifequal %}/>
+				<label for="proj_mentioned_no">No</label>
+				<input name="proj_mentioned" id="proj_mentioned_na" value="N/A" type="radio" {% ifequal questions.proj_mentioned.answer "N/A" %}checked="checked"{% endifequal %}/>
+				<label for="proj_mentioned_na">N/A</label>
+
+			</div>
+			{% endif %}
+			</fieldset>
+			<br />
+			{% endif %}
+
+			{% if questions.grants.editable or questions.contracts.editable %}
+	<fieldset  id="contracts">
+	<legend><span class="contracts">Recipient Contracts & Grants</span></legend>
+	<div>
+	To find whether the recipient has Federal Contracts or Grants, use <a href="http://www.fedspending.org" target="_new">Fedspending.org</a>,
+a project of OMB Watch. The contract search page is <a href="http://www.fedspending.org/fpds/index.php?reptype=a" target="_new">here</a>
+and the grant search page is <a href="http://www.fedspending.org/faads/index.php?reptype=a" target="_new">here</a>.
+	(<a href="javascript:;" onmousedown="toggleSlide('contractsgrants');">more</a>)
+<div id="contractsgrants" style="display:none; overflow:hidden; height:80px;">
+Type the name of the recipient in the search box on the left hand column of the page.
+(handy tip: If the recipient has a long name, type just the first word or two, and see if you can find the full name of the firm in the results).
+</div>
+</div>
+<br />
+{% if questions.contracts.editable %}
+	<div class="controlset">
+<span class="label">Did your search show that the recipient received federal contracts?</span><p>
+<input name="contracts" id="contracts_yes" value="Yes" type="radio" {% ifequal questions.contracts.answer "Yes" %}checked="checked"{% endifequal %}/>
+<label for="contracts">Yes</label><input name="contracts" id="contracts_no" value="No" type="radio" {% ifequal questions.contracts.answer "No" %}checked="checked"{% endifequal %}/>
+<label for="contracts">No</label></p></div>
+{% endif %}
+{% if questions.contracts_url.editable %}
+<div id="contracts_url_entry">Please paste the URL/web address of the Contracts results page below:
+<input id="contracts_url" type="text" name="contracts_url"
+value="{{questions.contracts_url.answer|escape}}" size="65" /></div>
+<br />
+{% endif %}
+
+{% if questions.grants.editable %}
+			<div class="controlset">
+<span class="label">Did your search show that the recipient received federal grants?</span><p>
+<input name="grants" id="grants_yes" value="Yes" type="radio" {% ifequal questions.grants.answer "Yes" %}checked="checked"{% endifequal %}/>
+				<label for="grants_yes">Yes</label>
+				<input name="grants" id="grants_no" value="No" type="radio" {% ifequal questions.grants.answer "No" %}checked="checked"{% endifequal %}/>
+				<label for="grants_no">No</label></p></div>
+				{% endif %}
+{% if questions.grants_url.editable %}
+<div id="grants_url_entry">Please paste the URL/web address of the Grants results page below:
+<input id="grants_url" type="text" name="grants_url"
+value="{{questions.grants_url.answer|escape}}" size="65" /></div>
+				<br />
+				{% endif %}
+
+<div id="tip">
+(For more information on using FedSpending.org, see the <a href="http://www.fedspending.org/tutorials.php" target="_new">helpful tutorials</a> OMB Watch has provided.)
+</div>
+				</fieldset>
+				<br />
+{% endif %}  <!-- ends the bit looking to see if contract AND grants are done so we don't display the legend, etc. -->
+
+
+
+	{% if questions.contributors.editable  %}
+<fieldset  id="campaigncontributions">
+	<legend>Recipient Political Contribution Information</legend>
+
+<div>Use <a href="http://opensecrets.org/indivs/index.asp" target="_new">OpenSecrets's Donor Lookup</a> to find out if
+employees of the recipient collectively contributed more than $20,000 to candidates for federal office during the current and last election cycle?
+(<a href="javascript:;" onmousedown="toggleSlide('campaign_contrib');">Additional instructions</a>)
+<div id="campaign_contrib" style="display:none; overflow:hidden; height:175px;">
+Go to the <a href="http://opensecrets.org/indivs/index.asp" target="_new">donor lookup page</a> on OpenSecrets.org, and
+on OpenSecrets.org, and enter the recipient name in the "occupation/employer" field of the form. <br /><br />Choose the 2008 and 2006 cycles to search, and don't forget to type the captcha text&mdash;the jumbled group of letters&mdash;into the box at the bottom of the page before clicking search.</div>
+</div>
+<br />
+
+<div class="controlset">
+<span class="label">Have employees collectively contributed more than $20,000?</span>
+<input name="contributors" id="contributors_yes" value="Yes" type="radio" {% ifequal questions.contributors.answer "Yes" %}checked="checked"{% endifequal %}/>
+<label for="contributors_yes">Yes</label>
+<input name="contributors" id="contributors_no" value="No" type="radio" {% ifequal questions.contributors.answer "No" %}checked="checked"{% endifequal %}/>
+<label for="contributors_no">No</label>
+</div>
+
+</fieldset>
+<br />
+{% endif %}
+
+
+
+
+{% if questions.sponsor_credit.editable %}
+<fieldset>
+<legend>Earmark Sponsor Details</legend>
+<div>To find if a Member is taking credit for the earmark, visit their official web site. (<a href="javascript:;" onmousedown="toggleSlide('sponsordetails');">more</a>)<br />
+<div id="sponsordetails" style="display:none; overflow:hidden; height:65px;">
+Members of Congress often issue press releases when they secure earmarks for their districts or states.
+Click through to the official Web site of the sponsor(s) of this earmark, and see if there's a press release describing it.</div>
+Sponsor Site(s):<br />
+{% for sponsor in earmark.sponsors.all %}
+<strong>{{sponsor}}</strong> - <a href="{{sponsor.website}}" target="_new">{{sponsor.website}}</a><br />
+{% endfor %}
+
+
+</div>
+<div class="controlset">
+<span class="label">Does a sponsoring member take credit?</span>
+				<input name="sponsor_credit" id="sponsor_credit" value="Yes" type="radio" {% ifequal questions.sponsor_credit.answer "Yes" %}checked="checked"{% endifequal %}/>
+                <label for="sponsor_credit">Yes</label>
+				<input name="sponsor_credit" id="sponsor_credit" value="No" type="radio" {% ifequal questions.sponsor_credit.answer "No" %}checked="checked"{% endifequal %}/>
+                <label for="sponsor_credit">No</label>
+                <input name="sponsor_credit" id="sponsor_credit" value="N/A" type="radio" {% ifequal questions.sponsor_credit.answer "N/A" %}checked="checked"{% endifequal %}/>
+                <label for="sponsor_credit">N/A</label>
+</div>
+</fieldset>
+<br />
+{% endif %}
+
+
+
+
+{% if questions.recipient_lobbying.editable or questions.lobbying_forms.editable %}
+<fieldset>
+<legend>Recipient Lobbying Lookup</legend>
+<div>
+Use the <a href="http://opensecrets.org/lobbyists/search.asp" target="_new">lobbying search page</a> at OpenSecrets.org to determine if the recipient hired federal lobbyists.
+
+(<a href="javascript:;" onmousedown="toggleSlide('recipient_lobbying');">additional instructions</a>)
+<div id="recipient_lobbying" style="display:none; overflow:hidden; height:160px;">
+To use the lobbying search page, enter the name of the recipient in the box labeled "Search by Name."
+(Be sure to leave the pull down menu above the "Search by Name" box alone -- it should say, "Client (Organization paying for lobbying.")
+ <br /> <br />
+If the company has hired lobbyists, you should get a results page with the company name highlighted as a link.
+Click on the link to see if the organization spent money on lobbying the current Congress.
+</div>
+</div>
+<br />
+{% if questions.recipient_lobbying.editable %}
+<div class="controlset">
+<span class="label">Did the recipient hire federal lobbyists?</span>
+				<input name="recipient_lobbying" id="recipient_lobbying_yes" value="Yes" type="radio" {% ifequal questions.recipient_lobbying.answer "Yes" %}checked="checked"{% endifequal %}/>
+                <label for="recipient_lobbying_yes">Yes</label>
+				<input name="recipient_lobbying" id="recipient_lobbying_no" value="No" type="radio" {% ifequal questions.recipient_lobbying.answer "No" %}checked="checked"{% endifequal %}/>
+                <label for="recipient_lobbying_no">No</label>
+</div>
+{% endif %}
+
+{% if questions.lobbying_forms.editable %}
+<div id="recipient_lobbying_url_entry">Copy and Paste the URL of the page here:
+<input id="recipient_lobbying_url" type="text" name="lobbying_forms"
+value="{{questions.lobbying_forms.answer|escape}}" size="65" /></div>{% endif %}
+
+</fieldset>
+<br />
+
+{% endif %}
+
+
+
+<input type="hidden" name="eid" value="{{earmark.id}}" />
+<input type="submit" value="Submit Your Earmark Research" class="buttons" />
+</form>
+
+
+	</div><!-- /form-container -->
+
+{% endif %}
+{% endif %}
+
+{% else %}
+
+<div id="multiplerecipients">
+<h2 class="blue_header">This Earmark Has Multiple Recipients</h2>
+<p class="welcome">
+Because this earmark specifies multiple recipients, we'll skip the guided research.</p>
+<div id="recipient_container">
+<ul id="recipientlist">
+{% for recip in earmark.location_set.all %}
+	<li>{{recip.name}}</li>
+{% endfor %}
+</ul>
+</div>
+
+
+<p class="regular">While you are certainly encouraged to
+<a href="http://google.com" target="_new">google</a> the recipients for information on them, or to see if they've received contracts or grants in
+<a href="http://fedspending.org" target="_new">FedSpending.org</a>, or have made <a href="http://www.opensecrets.org/indivs/index.asp" target="_new">campaign contributions</a> or <a href="http://www.opensecrets.org/lobbyists/index.asp" target="_new">
+hired lobbyists</a> at
+<a href="http://www.opensecrets.org/" target="_new">opensecrets</a>,
+we're not providing a separate set of fields to hold that research.<br /><br /> Feel free to leave information on what you find in the "Add a comment or contribute
+additional research" box below.
+</p>
+</div>
+
+{% endifequal %}
+
+<!-- if there are no comments, don't display the X comments on this Earmark -->
+<a name="comments"></a>
+{% if comments|length_is:0 %}
+
+{% if user.is_authenticated %}
+
+{% else %}
+
+<h1 class="darkorange_header">Comments, notes, additional research...</h1>
+<div id="yellowbox"><p class="welcome">
+There are no comments or notes yet for this earmark.
+<a href="{% url login %}{{next_path|escape}}">Sign in</a> or
+<a href="{% url register %}{{next_path|escape}}">Register</a>
+to be the first to comment on this earmark.
+</p></div>
+{% endif %}
+
+{% else %}
+<br /><br />
+<h1 class="darkorange_header">Comments, notes, additional research...</h1>
+
+
+{% for c in comments %}
+    <a name="comment_{{c.id}}"></a>
+
+<div id="comment_top"><p><a href="{% url user_view c.user.username %}" class="user_wrote">{{c.user}}</a> wrote:</p>
+
+</div>
+<div id="comment_bottom">
+ {% ifequal c.status "F" %}
+    <span class="flag"><strong>[this item has been flagged and is pending review]</strong></span><br />
+        {% endifequal %}
+        {% ifequal c.status "A" %}
+        {% endifequal %}
+        {% ifequal c.status "R" %}
+<strong>this item has been removed.</strong>
+        {% endifequal %}
+
+        {{c.text|escape|urlize|linebreaksbr}}
+     <p class="posted">posted <a href="#comment_{{c.id}}" class="user_posted" title="permalink to this comment">{{c.submit_date|date:"F j, Y \a\t P"}}</a>
+     {% if user.is_authenticated %}
+     {% ifequal c.status "U" %}
+     <sup id="flagcomment{{c.id}}">(<a href="javascript:flagComment({{c.id}});" class="flag" title="Flag this Comment as Noise!">flag</a>)</sup>
+     {% endifequal %}
+     {% endif %}
+     </p>
+</div>
+
+
+{% endfor %}
+
+{% endif %}
+
+<!--  if the user is not logged in, they don't see the comment box -->
+{% if user.is_authenticated %}
+	<br />
+	<br />
+		<br />
+<a name="comment"></a>
+<h1 class="darkorange_header">Add a comment or contribute additional research*</h1>
+<span class="disclaimer_lrgest">Please keep comments and contributions related to earmarks and earmark research.</span>
+<div id="yellowbox">
+<p class="taxpayers">&#8220;{{earmark}}&#8221;</p>
+<form method="post" action="{% url post_earmark_comment %}">
+<textarea id="text" name="text" cols="60" rows="5"></textarea>
+<input type="hidden" name="id" value="{{earmark.id}}" />
+<p>Note: HTML tags have been disabled. URLs will be automatically linked.</p>
+<input type="submit" value="Submit a Comment" class="button" />
+</form>
+</div>
+<span class="welcome">*Here are some ideas for additional research... (<a href="javascript:;" onmousedown="toggleSlide('additional_research');">more</a>)
+
+<div id="additional_research" style="display:none; overflow:hidden; height:1500px;">
+<br />
+
+
+<p>About the Recipient</p>
+
+<p>What kind of organization is the recipient? Is it a Federal, State or Local government entity? Is it a university or college?
+A nonprofit organization set up under section 501c of the federal tax code? A for profit company?</p>
+
+<p>If the organization is a federal entity, has it been evaluated by the Executive Branch (check <a href="http://ExpectMore.gov" target="_new">ExpectMore.gov</a> to find out) or
+Congress (search General Accounting Office reports and congressional committee hearings and reports at <a href="http://www.louisdb.org" target="_new">LOUISdb</a>).</p>
+
+<p>If it&#8217;s a nonprofit or private college or university, you can look up its federal tax filings-known as a form 990-at the <a href="http://foundationcenter.org/findfunders/990finder/" target="_new">Foundation Center&#8217;s 990 search</a>.
+The search results page gives some basic information about the organization-the state where it&#8217;s located
+and its total assets, which the forms themselves (which like most tax forms that come from the Internal Revenue Service are lengthy and complex) include
+information on how much of organization&#8217;s funding comes from taxpayers (page one, line 1C), whether the organization hires lobbyists
+(schedule A, page 5, lines 36 to 50), and how much the organization pays its officers and directors (page 5, Part V). </p>
+
+
+<p>If the organization is a for-profit company, check to see if it&#8217;s publicly owned (that is, that it sells stocks to investors and has to report on its
+activities to the Securities and Exchange Commission). Sites like <a href="http://www.investorguide.com/stocklist.cgi" target="_new">InvestorsGuide.com</a> offer alphabetical
+lists of publicly traded companies, while <a href="http://finance.yahoo.com/lookup" target="_new">Yahoo! Finance</a> lets you look up company names to see if they have a
+stock symbol (and are thus publicly traded). Yahoo! Finance company profiles provide information on top executives, company income and profit, historical stock prices,
+plus links to annual reports (form 10K), quarterly reports (form 10Q) and important company news (form 8K). The Securities and Exchange Commission&#8217;s <a href="http://sec.gov/edgar/searchedgar/companysearch.html" target="_new">Edgar site</a> lets
+users look up all forms filed with the SEC, including annual and quarterly reports, proxy statements, and ownership information.</p>
+
+<p>Has the recipient been cited for previous misconduct in connection with a federal contract? The Project on Government Oversight maintains a database on top contractors
+and their legal problems at <a href="http://www.contractormisconduct.org" target="_new">www.contractormisconduct.org</a></p>
+
+<p>Is the recipient involved in federal litigation? Find out at <a href="http://www.dockets.justia.com" target="_new">www.dockets.justia.com</a>.</p>
+
+<p>Earmark Lobbying Lookup</p>
+
+<p>Did the recipient&#8217;s lobbyists specifically lobby on federal spending? To find out if the recipient specifically lobbied on government spending issues,
+go to the Web site of the <a href="http://sopr.senate.gov/cgi-win/m_opr_viewer.exe?DoFn=0" target="_new">Senate Office of Public Records</a>. First, click on the word &#8220;CLIENT&#8221;
+in the box (it's the second item) to highlight it. Now, while holding down your Control button (or Apple key if you're a Mac user), click on &#8220;FILING YEAR.&#8221;
+Both terms should be highlighted. Then Click &#8220;GO!&#8221;</p>
+
+<p>Enter part of the name of the recipient of the earmark in the client box (leave the &#8220;2007&#8221; part alone-that will ensure we get forms only from the current year).
+Then click the GO! Button and see what turns up. Be forewarned: the search engine on this site is very difficult to use. Click here for tips on searching (you might need to
+try several variations on the organization's name).</p>
+
+<p>If you do find lobbying forms, look for the ones labeled &#8220;MID-YEAR REPORT.&#8221; Click on each MID-YEAR REPORT, and look for lines 15 and 16 of the report
+(usually on page two, although note that some lobbying forms can be as long as 20 or more pages, with each different page listing a different lobbying issue for the
+organization-you might have to scroll through every page to find what you're looking for). Do any of the forms you specify Appropriations or Budget?</p>
+
+<p>Who are the recipients lobbyists? Have they worked for a member of Congress? The names of the lobbyists are listed on line 18 of the mid-year report;
+look them up to see if they went through the revolving door at the Center for Responsive Politics&#8217; <a href="http://opensecrets.org/revolving/index.asp" target="_new">revolving door index</a>. </p>
+</div>
+
+
+{% endif %}
+
+<script>
+// attach url toggle events onto these ids
+['contracts', 'grants', 'recipient_lobbying'].each(add_url_toggle_events);
+</script>
+
+{% endblock content %}

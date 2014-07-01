@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{%load humanize%}
+
+{% block content %}
+
+
+<h2 class="red_header">Most Recent Earmark Comments</h2>
+
+    {% for c in comments %}
+    <div id="yellowcommentbox">
+<a href="{% url earmark_view c.earmark_id %}#comment_{{c.id}}" class="taxpayers">{{c.user}} on &#8220;{{c.earmark.description}}&#8221;</a>
+    </div><br />
+    {% endfor %}
+
+
+
+
+
+{% endblock content %}

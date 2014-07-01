@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+<form method="post" action="{% url login %}">
+<fieldset>
+<legend>Sign In</legend>
+
+<table class="logintable">
+{{form.as_table}}
+</table>
+<input type="hidden" name="next" value="{{next}}" />
+<br /><input type="submit" value="Sign In" />
+</form>
+
+</fieldset>
+<a href="{% url reset_password %}">Forgot your password?</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Don't have an account? <a href="{% url register %}">Create one!</a>
+</div>
+
+</div> <!--  end the first YUI row -->
+
+<div class="yui-g">
+
+{% endblock content %}

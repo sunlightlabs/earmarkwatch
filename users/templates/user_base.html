@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="alternate" type="application/rss+xml" title="RSS feed for {{the_user}}" href="/rss{% url user_view the_user %}">
+
+<div id="user_head_profile">  <!--  this is the container -->
+<table cellpadding="10" cellspacing="10" border="0">
+<tr>
+<td></td>
+<td>
+<div id="user_head_right">
+<big><h1 class="blue_header_bold_profile">{{ the_user.username }} <a href="/rss{% url user_view the_user %}" class="no_bg"><img src="/static/images/feed-icon-12x12.gif"></a></h1></big>
+<div id="member_since">Member since: {{ the_user.date_joined|date:"m/d/y" }}</div>
+</div>
+</td>
+</tr>
+</table>
+<div id="user_head_bio">
+{{the_user.get_profile.about|striptags}}
+</div>
+
+</div>  <!--  ends container -->
+
+
+
+
+<ul id="usertabnavlist">
+<li><a href="{% url user_view the_user.username %}"
+    {% ifequal tab "profile" %}id="current"{%endifequal%}>Profile</a></li>
+<li><a href="{% url user_view the_user.username %}earmarks"
+    {% ifequal tab "earmarks" %}id="current"{%endifequal%}>Research</a></li>
+<li><a href="{% url user_view the_user.username %}comments"
+    {% ifequal tab "comments" %}id="current"{%endifequal%}>Comments</a></li>
+<li><a href="{% url user_view the_user.username %}messages"
+    {% ifequal tab "messages" %}id="current"{%endifequal%}>Messages</a></li>
+{% ifequal user the_user %}<li><a href="{% url user_view the_user.username %}manage"
+    {% ifequal tab "manage" %}id="current"{%endifequal%}>Manage Account</a></li>{% endifequal %}
+
+</ul>
+
+{% block user_content %}
+[user_base.html is a virtual template, this should not be seen]
+{% endblock user_content %}
+
+</div> <!--  end the first YUI row -->
+
+<div class="yui-g">
+{% endblock content %}
